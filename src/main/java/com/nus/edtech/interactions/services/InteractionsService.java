@@ -6,6 +6,7 @@ import com.nus.edtech.interactions.repositories.InteractionsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -28,5 +29,26 @@ public class InteractionsService {
 
     public InteractionsEntity getInteractionById(String interactionId) {
         return interactionsRepository.findInteractionById(interactionId);
+    }
+
+    public void deleteInteractionById(String interactionId) {
+        InteractionsEntity interactionsEntity = interactionsRepository.findInteractionById(interactionId);
+        interactionsRepository.deleteInteraction(interactionsEntity);
+    }
+
+    public void deleteInteractionByAuthor(String authorId) {
+        List<InteractionsEntity> interactionsEntityList = interactionsRepository.findInteractionsByAuthor(authorId);
+        for (InteractionsEntity interactionEntity : interactionsEntityList) {
+            interactionsRepository.deleteInteraction(interactionEntity);
+        }
+    }
+
+    public List<String> findInteractionsByAuthor(String authorId) {
+        List<InteractionsEntity> items = interactionsRepository.findInteractionsByAuthor(authorId);
+        List<String> idList = new ArrayList<>();
+        for(InteractionsEntity item: items) {
+            idList.add(item.getInteractionId());
+        }
+        return idList;
     }
 }

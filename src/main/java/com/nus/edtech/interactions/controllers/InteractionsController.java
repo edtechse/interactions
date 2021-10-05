@@ -18,6 +18,7 @@ import java.util.UUID;
 public class InteractionsController {
 
     private static final String BLOGS_SERVICE = "blogsService";
+    private static final String BLOGS_SERVICE_URL = "http://localhost:9001/v1/blogs/blog/";
 
     @Autowired
     private InteractionsService interactionsService;
@@ -51,9 +52,41 @@ public class InteractionsController {
         }
 
     }
+
+    @DeleteMapping("interaction/{interactionid}")
+    public boolean deleteInteractionById(@PathVariable(value = "interactionid") String interactionId) throws Exception {
+        try {
+            if (interactionId == null)
+                throw new Exception("Empty interactionId sent for delete");
+            interactionsService.deleteInteractionById(interactionId);
+            return true;
+        } catch (Exception ex) {
+            throw new Exception("deleteInteractionById:: Failed to delete interaction due to " + ex.getMessage());
+        }
+    }
+
+    @GetMapping("author/{authorid}")
+    public List<String> getInteractionIdsByAuthor(@PathVariable(value = "authorid") String authorId) throws Exception {
+        if (authorId == null)
+            throw new Exception("Input author is null");
+        return interactionsService.findInteractionsByAuthor(authorId);
+    }
+
+    @DeleteMapping("author/{authorid}")
+    public boolean deleteInteractionByAuthor(@PathVariable(value = "authorid") String authorId) throws Exception {
+        try {
+            if (authorId == null)
+                throw new Exception("Empty authorId sent for delete");
+            interactionsService.deleteInteractionByAuthor(authorId);
+            return true;
+        } catch (Exception ex) {
+            throw new Exception("deleteInteractionByAuthor:: Failed to delete interaction due to " + ex.getMessage());
+        }
+    }
+
     @PostMapping("{seedtype}/author/{author}")
     @CircuitBreaker(name= BLOGS_SERVICE, fallbackMethod= "interactionFallback")
-    public boolean postInteraction(@PathVariable(value = "seedtype") String seedType,
+    public String postInteraction(@PathVariable(value = "seedtype") String seedType,
                                    @PathVariable(value = "author") String author,
                                    @RequestBody Interactions requestInteraction) throws Exception {
         if (seedType == null || author == null || requestInteraction == null)
@@ -65,16 +98,16 @@ public class InteractionsController {
             requestInteraction.setInteractionId(interactionId);
             InteractionsEntity requestInteractionEntity = mapperFacade.map(requestInteraction, InteractionsEntity.class);
             interactionsService.postInteraction(requestInteractionEntity);
-            restTemplate.put("http://localhost:9001/v1/blogs/blog/"+requestInteractionEntity.getSeedId()+"/interaction",
-                    requestInteraction, Boolean.class);
-            return true;
+            restTemplate.put(BLOGS_SERVICE_URL+requestInteractionEntity.getSeedId()+"/interaction",
+                    requestInteraction, String.class);
+            return "Interaction added and blog updated successfully.";
 
         } catch (Exception ex) {
             throw ex;
         }
     }
 
-    public boolean interactionFallback(Exception e){
-        return false;
+    public String interactionFallback(Exception e){
+        return "Interaction added, blog service is down";
     }
 }

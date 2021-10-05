@@ -76,11 +76,6 @@
 			<artifactId>spring-boot-starter-aop</artifactId>
 			<version>2.2.6.RELEASE</version>
 		</dependency>
-		<!--<dependency>
-			<groupId>com.amazonaws</groupId>
-			<artifactId>amazon-dax-client</artifactId>
-			<version>1.0.230341.0</version>
-		</dependency>-->
 	</dependencies>
 
 	<build>

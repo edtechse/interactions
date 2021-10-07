@@ -5,6 +5,17 @@ amazon:
 server:
   port: 9003
 
+cloud:
+  aws:
+    credentials:
+      profile-name: default
+    region:
+      auto: false
+      static: ap-southeast-1
+logging:
+  level:
+    io:
+      micrometer: DEBUG
 resilience4j:
   circuitbreaker:
     instances:
@@ -29,3 +40,8 @@ management:
   endpoint:
     health:
       show-details: always
+  metrics:
+    export:
+      cloudwatch:
+        namespace: integrationsApp
+        batchSize: 10

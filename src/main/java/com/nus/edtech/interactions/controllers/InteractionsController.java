@@ -32,8 +32,8 @@ public class InteractionsController {
     @GetMapping("all")
     public List<Interactions> getAllInteractions(){
         try {
-            List<InteractionsEntity> responseBlogList = interactionsService.getAllInteractions();
-            return mapperFacade.mapAsList(responseBlogList,Interactions.class);
+            List<InteractionsEntity> responseInteractionsList = interactionsService.getAllInteractions();
+            return mapperFacade.mapAsList(responseInteractionsList,Interactions.class);
         } catch (Exception ex) {
             throw ex;
         }

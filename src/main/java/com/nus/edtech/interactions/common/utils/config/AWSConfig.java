@@ -61,7 +61,7 @@ public class AWSConfig {
     @Bean
     public CloudWatchAsyncClient cloudWatchAsyncClient() {
         return CloudWatchAsyncClient.builder().region(Region.AP_SOUTHEAST_1)
-                .credentialsProvider(ProfileCredentialsProvider.create("default")).build();
+                .credentialsProvider(ProfileCredentialsProvider.create("cloudwatch")).build();
     }
 
     @Bean

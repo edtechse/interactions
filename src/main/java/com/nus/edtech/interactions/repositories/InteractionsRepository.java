@@ -46,4 +46,15 @@ public class InteractionsRepository {
     public void deleteInteraction(InteractionsEntity interactionsEntity) {
         dynamoDBMapper.delete(interactionsEntity);
     }
+
+    public List<InteractionsEntity> findInteractionsBySeedId(String seedId) {
+        Map<String, AttributeValue> eav = new HashMap<String, AttributeValue>();
+
+        eav.put(":val", new AttributeValue().withS(seedId));
+        DynamoDBScanExpression scanExpression = new DynamoDBScanExpression()
+                .withFilterExpression("seedid = :val").withExpressionAttributeValues(eav);
+        List<InteractionsEntity> scanResult = dynamoDBMapper.scan(InteractionsEntity.class, scanExpression);
+
+        return scanResult;
+    }
 }

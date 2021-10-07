@@ -43,6 +43,13 @@ public class InteractionsService {
         }
     }
 
+    public void deleteInteractionBySeedId(String seedId) {
+        List<InteractionsEntity> interactionsEntityList = interactionsRepository.findInteractionsBySeedId(seedId);
+        for (InteractionsEntity interactionEntity : interactionsEntityList) {
+            interactionsRepository.deleteInteraction(interactionEntity);
+        }
+    }
+
     public List<String> findInteractionsByAuthor(String authorId) {
         List<InteractionsEntity> items = interactionsRepository.findInteractionsByAuthor(authorId);
         List<String> idList = new ArrayList<>();
@@ -50,5 +57,9 @@ public class InteractionsService {
             idList.add(item.getInteractionId());
         }
         return idList;
+    }
+
+    public List<InteractionsEntity> findInteractionsBySeedId(String seedId) {
+        return interactionsRepository.findInteractionsBySeedId(seedId);
     }
 }

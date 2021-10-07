@@ -84,6 +84,27 @@ public class InteractionsController {
         }
     }
 
+    @GetMapping("{seedtype}/{seedid}")
+    public List<InteractionsEntity> getInteractionIdsBySeedId(@PathVariable(value = "seedtype") String seedType,
+                                                  @PathVariable(value = "seedid") String seedId) throws Exception {
+        if (seedType == null || seedId == null)
+            throw new Exception("Input seedType or seedId is null");
+        return interactionsService.findInteractionsBySeedId(seedId);
+    }
+
+    @DeleteMapping("{seedtype}/{seedid}")
+    public String deleteInteractionBySeedId(@PathVariable(value = "seedtype") String seedType,
+                                             @PathVariable(value = "seedid") String seedId) throws Exception {
+        try {
+            if (seedType == null || seedId == null)
+                throw new Exception("Input seedType or seedId is null");
+            interactionsService.deleteInteractionBySeedId(seedId);
+            return "Interactions of the seed are deleted";
+        } catch (Exception ex) {
+            throw new Exception("deleteInteractionBySeedId:: Failed to delete interaction due to " + ex.getMessage());
+        }
+    }
+
     @PostMapping("{seedtype}/author/{author}")
     @CircuitBreaker(name= BLOGS_SERVICE, fallbackMethod= "interactionFallback")
     public String postInteraction(@PathVariable(value = "seedtype") String seedType,

@@ -1,6 +1,12 @@
 package com.nus.edtech.interactions.controllers;
 
+import com.amazon.sqs.javamessaging.AmazonSQSMessagingClientWrapper;
+import com.amazon.sqs.javamessaging.ProviderConfiguration;
+import com.amazon.sqs.javamessaging.SQSConnection;
+import com.amazon.sqs.javamessaging.SQSConnectionFactory;
+import com.amazonaws.services.sqs.AmazonSQSClientBuilder;
 import com.nus.edtech.interactions.dao.InteractionsEntity;
+import com.nus.edtech.dto.BlogsInteractionDto;
 import com.nus.edtech.interactions.exceptions.InvalidRequestException;
 import com.nus.edtech.interactions.models.Interactions;
 import com.nus.edtech.interactions.services.InteractionsService;
@@ -9,12 +15,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
+
+import javax.jms.*;
 import java.util.List;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/v1/interactions/")
-
 public class InteractionsController {
 
     private static final String BLOGS_SERVICE = "blogsService";
@@ -119,8 +126,16 @@ public class InteractionsController {
             requestInteraction.setInteractionId(interactionId);
             InteractionsEntity requestInteractionEntity = mapperFacade.map(requestInteraction, InteractionsEntity.class);
             interactionsService.postInteraction(requestInteractionEntity);
-            restTemplate.put(BLOGS_SERVICE_URL+requestInteractionEntity.getSeedId()+"/interaction",
-                    requestInteraction, String.class);
+
+            BlogsInteractionDto blogInteraction =
+                    new BlogsInteractionDto(
+                            requestInteractionEntity.getSeedId(),
+                            requestInteractionEntity.getInteractionId(),
+                            requestInteractionEntity.getInteractionType(),
+                            requestInteractionEntity.getInteractionValue());
+
+            sendMessageToSQS(blogInteraction);
+
             return "Interaction added and blog updated successfully.";
 
         } catch (Exception ex) {
@@ -130,5 +145,38 @@ public class InteractionsController {
 
     public String interactionFallback(Exception e){
         return "Interaction added, blog service is down";
+    }
+
+
+    private void sendMessageToSQS(BlogsInteractionDto blogInteraction) throws JMSException {
+        // Create a new connection factory with all defaults (credentials and region) set automatically
+        SQSConnectionFactory connectionFactory = new SQSConnectionFactory(
+                new ProviderConfiguration(),
+                AmazonSQSClientBuilder.defaultClient()
+        );
+
+        // Create the connection.
+        SQSConnection connection = connectionFactory.createConnection();
+
+        // Get the wrapped client
+        AmazonSQSMessagingClientWrapper client = connection.getWrappedAmazonSQSClient();
+
+        // Create an SQS queue named MyQueue, if it doesn't already exist
+        if (!client.queueExists("BlogsQueue")) {
+            client.createQueue("BlogsQueue");
+        }
+
+        Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+        Queue queue = session.createQueue("BlogsQueue");
+
+        // Create a producer for the 'MyQueue'
+        MessageProducer producer = session.createProducer(queue);
+
+        ObjectMessage objectMessage = session.createObjectMessage();
+        objectMessage.setObject(blogInteraction);
+        producer.send(objectMessage);
+
+        session.close();
+        connection.close();
     }
 }

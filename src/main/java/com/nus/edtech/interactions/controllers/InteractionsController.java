@@ -73,7 +73,7 @@ public class InteractionsController {
     }
 
     @GetMapping("author/{authorid}")
-    public List<String> getInteractionIdsByAuthor(@PathVariable(value = "authorid") String authorId) throws Exception {
+    public List<InteractionsEntity> getInteractionIdsByAuthor(@PathVariable(value = "authorid") String authorId) throws Exception {
         if (authorId == null)
             throw new Exception("Input author is null");
         return interactionsService.findInteractionsByAuthor(authorId);

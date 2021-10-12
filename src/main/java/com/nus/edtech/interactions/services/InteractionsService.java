@@ -50,13 +50,9 @@ public class InteractionsService {
         }
     }
 
-    public List<String> findInteractionsByAuthor(String authorId) {
+    public List<InteractionsEntity> findInteractionsByAuthor(String authorId) {
         List<InteractionsEntity> items = interactionsRepository.findInteractionsByAuthor(authorId);
-        List<String> idList = new ArrayList<>();
-        for(InteractionsEntity item: items) {
-            idList.add(item.getInteractionId());
-        }
-        return idList;
+        return items;
     }
 
     public List<InteractionsEntity> findInteractionsBySeedId(String seedId) {

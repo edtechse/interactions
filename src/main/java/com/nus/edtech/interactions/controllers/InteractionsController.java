@@ -25,7 +25,6 @@ import java.util.UUID;
 public class InteractionsController {
 
     private static final String BLOGS_SERVICE = "blogsService";
-    private static final String BLOGS_SERVICE_URL = "http://localhost:9001/v1/blogs/blog/";
 
     @Autowired
     private InteractionsService interactionsService;
